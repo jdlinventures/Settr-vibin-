@@ -36,6 +36,16 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Onboarding wizard progress (0-5, 5 = completed)
+    onboardingStep: {
+      type: Number,
+      default: 0,
+    },
+    // Quick check if onboarding is complete
+    onboardingCompleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

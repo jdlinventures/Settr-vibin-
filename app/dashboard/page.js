@@ -3,6 +3,7 @@ import { auth } from "@/libs/auth";
 import connectMongo from "@/libs/mongoose";
 import CentralInbox from "@/models/CentralInbox";
 import ConnectedEmail from "@/models/ConnectedEmail";
+import User from "@/models/User";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,16 @@ export default async function Dashboard() {
   }
 
   await connectMongo();
+
+  // Check onboarding status
+  const user = await User.findById(session.user.id).select(
+    "onboardingCompleted onboardingStep"
+  );
+
+  // Redirect to onboarding if not completed
+  if (user && !user.onboardingCompleted) {
+    redirect("/dashboard/onboarding");
+  }
 
   // Check if user has any central inboxes
   const inboxes = await CentralInbox.find({
