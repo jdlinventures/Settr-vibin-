@@ -5,16 +5,19 @@ import { format } from "date-fns";
 import TagSelector from "./TagSelector";
 import StageDropdown from "./StageDropdown";
 import TagBadge from "./TagBadge";
+import ReplyComposer from "./ReplyComposer";
 
 export default function EmailDetail({ centralInboxId, threadId, onClose, onThreadUpdate }) {
   const [thread, setThread] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expandedEmails, setExpandedEmails] = useState(new Set());
   const [updating, setUpdating] = useState(false);
+  const [showReplyComposer, setShowReplyComposer] = useState(false);
 
   useEffect(() => {
     if (threadId) {
       fetchThread();
+      setShowReplyComposer(false); // Reset reply composer when switching threads
     }
   }, [threadId]);
 
@@ -365,25 +368,41 @@ export default function EmailDetail({ centralInboxId, threadId, onClose, onThrea
         })}
       </div>
 
-      {/* Reply Box Placeholder */}
+      {/* Reply Section */}
       <div className="p-4 border-t border-base-300">
-        <button className="btn btn-primary btn-block">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-5 h-5"
+        {showReplyComposer ? (
+          <ReplyComposer
+            centralInboxId={centralInboxId}
+            replyToEmail={thread.emails[thread.emails.length - 1]}
+            onSent={() => {
+              setShowReplyComposer(false);
+              fetchThread(); // Refresh to show sent email
+              onThreadUpdate?.();
+            }}
+            onCancel={() => setShowReplyComposer(false)}
+          />
+        ) : (
+          <button
+            onClick={() => setShowReplyComposer(true)}
+            className="btn btn-primary btn-block"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
-            />
-          </svg>
-          Reply
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
+              />
+            </svg>
+            Reply
+          </button>
+        )}
       </div>
     </div>
   );
