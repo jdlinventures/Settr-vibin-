@@ -7,7 +7,7 @@ import StageDropdown from "./StageDropdown";
 import TagBadge from "./TagBadge";
 import ReplyComposer from "./ReplyComposer";
 
-export default function EmailDetail({ centralInboxId, threadId, onClose, onThreadUpdate }) {
+export default function EmailDetail({ centralInboxId, threadId, onClose, onThreadUpdate, triggerReply }) {
   const [thread, setThread] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expandedEmails, setExpandedEmails] = useState(new Set());
@@ -20,6 +20,13 @@ export default function EmailDetail({ centralInboxId, threadId, onClose, onThrea
       setShowReplyComposer(false); // Reset reply composer when switching threads
     }
   }, [threadId]);
+
+  // Handle keyboard shortcut trigger for reply
+  useEffect(() => {
+    if (triggerReply && threadId && thread) {
+      setShowReplyComposer(true);
+    }
+  }, [triggerReply]);
 
   const fetchThread = async () => {
     setLoading(true);

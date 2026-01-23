@@ -3,7 +3,7 @@
 import { formatDistanceToNow } from "date-fns";
 import TagBadge from "./TagBadge";
 
-export default function EmailListItem({ email, isSelected, onClick }) {
+export default function EmailListItem({ email, isSelected, isKeyboardSelected, onClick }) {
   const isUnread = !email.isRead || email.threadUnreadCount > 0;
 
   // Get preview text from body
@@ -39,6 +39,7 @@ export default function EmailListItem({ email, isSelected, onClick }) {
         px-4 py-3 border-b border-base-200 cursor-pointer transition-colors
         hover:bg-base-200
         ${isSelected ? "bg-base-200 border-l-2 border-l-primary" : ""}
+        ${isKeyboardSelected && !isSelected ? "ring-2 ring-inset ring-primary/30" : ""}
         ${isUnread ? "bg-base-100" : "bg-base-100/50"}
       `}
     >

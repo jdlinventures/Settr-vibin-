@@ -10,6 +10,9 @@ export default function EmailList({
   filter,
   activeFilters = {},
   refreshKey,
+  searchQuery = "",
+  onEmailsLoaded,
+  selectedIndex = 0,
 }) {
   const [emails, setEmails] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,6 +38,7 @@ export default function EmailList({
         if (activeFilters.tags?.length > 0) {
           activeFilters.tags.forEach((tagId) => params.append("tag", tagId));
         }
+        if (searchQuery) params.set("search", searchQuery);
 
         const res = await fetch(
           `/api/inbox/${centralInboxId}/emails?${params.toString()}`
@@ -44,9 +48,14 @@ export default function EmailList({
           const data = await res.json();
 
           if (cursor) {
-            setEmails((prev) => [...prev, ...data.emails]);
+            setEmails((prev) => {
+              const updatedEmails = [...prev, ...data.emails];
+              onEmailsLoaded?.(updatedEmails);
+              return updatedEmails;
+            });
           } else {
             setEmails(data.emails);
+            onEmailsLoaded?.(data.emails);
           }
 
           setNextCursor(data.nextCursor);
@@ -59,7 +68,7 @@ export default function EmailList({
         setLoadingMore(false);
       }
     },
-    [centralInboxId, filter, activeFilters.stageId, activeFilters.tags]
+    [centralInboxId, filter, activeFilters.stageId, activeFilters.tags, searchQuery]
   );
 
   useEffect(() => {
@@ -115,11 +124,12 @@ export default function EmailList({
 
   return (
     <div className="h-full overflow-y-auto" onScroll={handleScroll}>
-      {emails.map((email) => (
+      {emails.map((email, index) => (
         <EmailListItem
           key={email.id || email._id}
           email={email}
           isSelected={selectedThreadId === email.threadId}
+          isKeyboardSelected={index === selectedIndex}
           onClick={() => onSelectThread(email.threadId, email)}
         />
       ))}
