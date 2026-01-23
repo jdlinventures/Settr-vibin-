@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import Sidebar from "./Sidebar";
 import EmailList from "./EmailList";
 import EmailDetail from "./EmailDetail";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function InboxLayout({ centralInboxId, children }) {
   const [selectedThreadId, setSelectedThreadId] = useState(null);
@@ -51,29 +52,32 @@ export default function InboxLayout({ centralInboxId, children }) {
           `}
         >
           {/* Filter Tabs */}
-          <div className="p-2 border-b border-base-300 flex gap-1">
-            <button
-              onClick={() => setFilter(null)}
-              className={`btn btn-sm ${!filter ? "btn-primary" : "btn-ghost"}`}
-            >
-              All
-            </button>
-            <button
-              onClick={() => setFilter("unread")}
-              className={`btn btn-sm ${
-                filter === "unread" ? "btn-primary" : "btn-ghost"
-              }`}
-            >
-              Unread
-            </button>
-            <button
-              onClick={() => setFilter("assigned")}
-              className={`btn btn-sm ${
-                filter === "assigned" ? "btn-primary" : "btn-ghost"
-              }`}
-            >
-              Assigned
-            </button>
+          <div className="p-2 border-b border-base-300 flex items-center justify-between">
+            <div className="flex gap-1">
+              <button
+                onClick={() => setFilter(null)}
+                className={`btn btn-sm ${!filter ? "btn-primary" : "btn-ghost"}`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setFilter("unread")}
+                className={`btn btn-sm ${
+                  filter === "unread" ? "btn-primary" : "btn-ghost"
+                }`}
+              >
+                Unread
+              </button>
+              <button
+                onClick={() => setFilter("assigned")}
+                className={`btn btn-sm ${
+                  filter === "assigned" ? "btn-primary" : "btn-ghost"
+                }`}
+              >
+                Assigned
+              </button>
+            </div>
+            <NotificationBell />
           </div>
 
           {/* Email List */}
