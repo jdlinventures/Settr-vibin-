@@ -3,6 +3,8 @@ import { auth } from "@/libs/auth";
 import connectMongo from "@/libs/mongoose";
 import CentralInbox from "@/models/CentralInbox";
 import Email from "@/models/Email";
+import Tag from "@/models/Tag";
+import Stage from "@/models/Stage";
 
 /**
  * GET /api/inbox/[centralInboxId]/emails
@@ -23,7 +25,7 @@ export async function GET(request, { params }) {
     const cursor = searchParams.get("cursor"); // Last email ID for pagination
     const limit = Math.min(parseInt(searchParams.get("limit")) || 50, 100);
     const filter = searchParams.get("filter"); // unread, assigned, archived
-    const tag = searchParams.get("tag"); // Tag ID
+    const tags = searchParams.getAll("tag"); // Tag IDs (can be multiple)
     const stage = searchParams.get("stage"); // Stage ID
     const search = searchParams.get("search"); // Search query
     const showWarmup = searchParams.get("showWarmup") === "true";
@@ -69,8 +71,8 @@ export async function GET(request, { params }) {
       query.isArchived = true;
     }
 
-    if (tag) {
-      query.tags = tag;
+    if (tags.length > 0) {
+      query.tags = { $all: tags };
     }
 
     if (stage) {
@@ -106,6 +108,34 @@ export async function GET(request, { params }) {
       },
       { $sort: { "latestEmail.receivedAt": -1 } },
       { $limit: limit + 1 }, // Fetch one extra to check if there are more
+      // Populate tags
+      {
+        $lookup: {
+          from: "tags",
+          localField: "latestEmail.tags",
+          foreignField: "_id",
+          as: "latestEmail.tags",
+        },
+      },
+      // Populate stage
+      {
+        $lookup: {
+          from: "stages",
+          localField: "latestEmail.stageId",
+          foreignField: "_id",
+          as: "stageArray",
+        },
+      },
+      {
+        $addFields: {
+          "latestEmail.stage": { $arrayElemAt: ["$stageArray", 0] },
+        },
+      },
+      {
+        $project: {
+          stageArray: 0,
+        },
+      },
     ]);
 
     // Check if there are more results

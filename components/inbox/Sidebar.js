@@ -4,19 +4,74 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
-export default function Sidebar({ onInboxChange }) {
+export default function Sidebar({ onInboxChange, onFilterChange, activeFilters = {} }) {
   const params = useParams();
   const router = useRouter();
   const [inboxes, setInboxes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showNewInbox, setShowNewInbox] = useState(false);
   const [newInboxName, setNewInboxName] = useState("");
+  const [tags, setTags] = useState([]);
+  const [stages, setStages] = useState([]);
+  const [loadingTags, setLoadingTags] = useState(false);
+  const [loadingStages, setLoadingStages] = useState(false);
 
   const currentInboxId = params.centralInboxId;
 
   useEffect(() => {
     fetchInboxes();
   }, []);
+
+  useEffect(() => {
+    if (currentInboxId) {
+      fetchTags();
+      fetchStages();
+    }
+  }, [currentInboxId]);
+
+  const fetchTags = async () => {
+    if (!currentInboxId) return;
+    setLoadingTags(true);
+    try {
+      const res = await fetch(`/api/central-inboxes/${currentInboxId}/tags`);
+      if (res.ok) {
+        const data = await res.json();
+        setTags(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch tags:", error);
+    } finally {
+      setLoadingTags(false);
+    }
+  };
+
+  const fetchStages = async () => {
+    if (!currentInboxId) return;
+    setLoadingStages(true);
+    try {
+      const res = await fetch(`/api/central-inboxes/${currentInboxId}/stages`);
+      if (res.ok) {
+        const data = await res.json();
+        setStages(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch stages:", error);
+    } finally {
+      setLoadingStages(false);
+    }
+  };
+
+  const toggleTagFilter = (tagId) => {
+    const currentTags = activeFilters.tags || [];
+    const newTags = currentTags.includes(tagId)
+      ? currentTags.filter((id) => id !== tagId)
+      : [...currentTags, tagId];
+    onFilterChange?.({ ...activeFilters, tags: newTags });
+  };
+
+  const setStageFilter = (stageId) => {
+    onFilterChange?.({ ...activeFilters, stageId: stageId === activeFilters.stageId ? null : stageId });
+  };
 
   const fetchInboxes = async () => {
     try {
@@ -151,6 +206,84 @@ export default function Sidebar({ onInboxChange }) {
               </li>
             ))}
           </ul>
+        )}
+
+        {/* Stages Section */}
+        {currentInboxId && (
+          <div className="mt-4">
+            <div className="flex items-center justify-between px-2 py-1 mb-2">
+              <span className="text-sm font-semibold text-base-content/70">
+                Stages
+              </span>
+            </div>
+            {loadingStages ? (
+              <div className="flex justify-center p-2">
+                <span className="loading loading-spinner loading-xs"></span>
+              </div>
+            ) : stages.length === 0 ? (
+              <p className="text-xs text-base-content/50 px-2">No stages</p>
+            ) : (
+              <ul className="menu menu-sm">
+                {stages.map((stage) => {
+                  const stageId = stage._id || stage.id;
+                  const isActive = activeFilters.stageId === stageId;
+                  return (
+                    <li key={stageId}>
+                      <button
+                        onClick={() => setStageFilter(stageId)}
+                        className={isActive ? "active" : ""}
+                      >
+                        <span
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: stage.color }}
+                        />
+                        {stage.name}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {/* Tags Section */}
+        {currentInboxId && (
+          <div className="mt-4">
+            <div className="flex items-center justify-between px-2 py-1 mb-2">
+              <span className="text-sm font-semibold text-base-content/70">
+                Tags
+              </span>
+            </div>
+            {loadingTags ? (
+              <div className="flex justify-center p-2">
+                <span className="loading loading-spinner loading-xs"></span>
+              </div>
+            ) : tags.length === 0 ? (
+              <p className="text-xs text-base-content/50 px-2">No tags yet</p>
+            ) : (
+              <ul className="menu menu-sm">
+                {tags.map((tag) => {
+                  const tagId = tag._id || tag.id;
+                  const isActive = (activeFilters.tags || []).includes(tagId);
+                  return (
+                    <li key={tagId}>
+                      <button
+                        onClick={() => toggleTagFilter(tagId)}
+                        className={isActive ? "active" : ""}
+                      >
+                        <span
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: tag.color }}
+                        />
+                        {tag.name}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
         )}
       </div>
 

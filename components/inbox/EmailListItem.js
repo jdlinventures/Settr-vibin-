@@ -1,6 +1,7 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
+import TagBadge from "./TagBadge";
 
 export default function EmailListItem({ email, isSelected, onClick }) {
   const isUnread = !email.isRead || email.threadUnreadCount > 0;
@@ -67,8 +68,8 @@ export default function EmailListItem({ email, isSelected, onClick }) {
       {/* Preview */}
       <div className="text-xs text-base-content/60 truncate">{getPreview()}</div>
 
-      {/* Bottom row: Thread count and tags */}
-      <div className="flex items-center gap-2 mt-2">
+      {/* Bottom row: Thread count, stage, and tags */}
+      <div className="flex items-center gap-2 mt-2 flex-wrap">
         {email.threadEmailCount > 1 && (
           <span className="badge badge-sm badge-ghost">
             {email.threadEmailCount} messages
@@ -77,6 +78,26 @@ export default function EmailListItem({ email, isSelected, onClick }) {
         {email.threadUnreadCount > 0 && (
           <span className="badge badge-sm badge-primary">
             {email.threadUnreadCount} new
+          </span>
+        )}
+        {email.stage && (
+          <span
+            className="badge badge-sm"
+            style={{
+              backgroundColor: `${email.stage.color}20`,
+              color: email.stage.color,
+              border: `1px solid ${email.stage.color}40`,
+            }}
+          >
+            {email.stage.name}
+          </span>
+        )}
+        {email.tags?.slice(0, 2).map((tag) => (
+          <TagBadge key={tag._id || tag.id} tag={tag} size="xs" />
+        ))}
+        {email.tags?.length > 2 && (
+          <span className="text-xs text-base-content/50">
+            +{email.tags.length - 2}
           </span>
         )}
       </div>

@@ -2,11 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
+import TagSelector from "./TagSelector";
+import StageDropdown from "./StageDropdown";
+import TagBadge from "./TagBadge";
 
-export default function EmailDetail({ centralInboxId, threadId, onClose }) {
+export default function EmailDetail({ centralInboxId, threadId, onClose, onThreadUpdate }) {
   const [thread, setThread] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expandedEmails, setExpandedEmails] = useState(new Set());
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     if (threadId) {
@@ -63,9 +67,49 @@ export default function EmailDetail({ centralInboxId, threadId, onClose }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isArchived: true }),
       });
+      onThreadUpdate?.();
       onClose?.();
     } catch (error) {
       console.error("Failed to archive:", error);
+    }
+  };
+
+  const handleTagsChange = async (newTags) => {
+    setUpdating(true);
+    try {
+      const tagIds = newTags.map((t) => t._id || t.id);
+      const res = await fetch(`/api/inbox/${centralInboxId}/threads/${threadId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tags: tagIds }),
+      });
+      if (res.ok) {
+        setThread((prev) => ({ ...prev, tags: newTags }));
+        onThreadUpdate?.();
+      }
+    } catch (error) {
+      console.error("Failed to update tags:", error);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleStageChange = async (newStage) => {
+    setUpdating(true);
+    try {
+      const res = await fetch(`/api/inbox/${centralInboxId}/threads/${threadId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stageId: newStage?._id || newStage?.id || null }),
+      });
+      if (res.ok) {
+        setThread((prev) => ({ ...prev, stage: newStage }));
+        onThreadUpdate?.();
+      }
+    } catch (error) {
+      console.error("Failed to update stage:", error);
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -110,47 +154,76 @@ export default function EmailDetail({ centralInboxId, threadId, onClose }) {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b border-base-300 flex items-center justify-between">
-        <h2 className="text-lg font-semibold truncate flex-1">
-          {thread.subject || "(No Subject)"}
-        </h2>
-        <div className="flex gap-2">
-          <button
-            onClick={handleArchive}
-            className="btn btn-ghost btn-sm"
-            title="Archive"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-5 h-5"
+      <div className="p-4 border-b border-base-300">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold truncate flex-1">
+            {thread.subject || "(No Subject)"}
+          </h2>
+          <div className="flex gap-2">
+            <button
+              onClick={handleArchive}
+              className="btn btn-ghost btn-sm"
+              title="Archive"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-              />
-            </svg>
-          </button>
-          <button onClick={onClose} className="btn btn-ghost btn-sm lg:hidden">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-5 h-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                />
+              </svg>
+            </button>
+            <button onClick={onClose} className="btn btn-ghost btn-sm lg:hidden">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-5 h-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Tags and Stage */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-base-content/50 uppercase tracking-wide">Stage:</span>
+            <StageDropdown
+              centralInboxId={centralInboxId}
+              selectedStage={thread.stage}
+              onStageChange={handleStageChange}
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-base-content/50 uppercase tracking-wide">Tags:</span>
+              <div className="flex-1">
+                <TagSelector
+                  centralInboxId={centralInboxId}
+                  selectedTags={thread.tags || []}
+                  onTagsChange={handleTagsChange}
+                />
+              </div>
+            </div>
+          </div>
+          {updating && (
+            <span className="loading loading-spinner loading-xs"></span>
+          )}
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Sidebar from "./Sidebar";
 import EmailList from "./EmailList";
 import EmailDetail from "./EmailDetail";
@@ -9,7 +9,9 @@ export default function InboxLayout({ centralInboxId, children }) {
   const [selectedThreadId, setSelectedThreadId] = useState(null);
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [filter, setFilter] = useState(null);
+  const [activeFilters, setActiveFilters] = useState({ tags: [], stageId: null });
   const [showMobileDetail, setShowMobileDetail] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleSelectThread = (threadId, email) => {
     setSelectedThreadId(threadId);
@@ -21,11 +23,22 @@ export default function InboxLayout({ centralInboxId, children }) {
     setShowMobileDetail(false);
   };
 
+  const handleFilterChange = useCallback((newFilters) => {
+    setActiveFilters(newFilters);
+  }, []);
+
+  const handleThreadUpdate = useCallback(() => {
+    setRefreshKey((k) => k + 1);
+  }, []);
+
   return (
     <div className="h-screen flex overflow-hidden bg-base-100">
       {/* Sidebar - Hidden on mobile */}
       <div className="hidden lg:block">
-        <Sidebar />
+        <Sidebar
+          onFilterChange={handleFilterChange}
+          activeFilters={activeFilters}
+        />
       </div>
 
       {/* Main Content */}
@@ -70,6 +83,8 @@ export default function InboxLayout({ centralInboxId, children }) {
               selectedThreadId={selectedThreadId}
               onSelectThread={handleSelectThread}
               filter={filter}
+              activeFilters={activeFilters}
+              refreshKey={refreshKey}
             />
           </div>
         </div>
@@ -85,6 +100,7 @@ export default function InboxLayout({ centralInboxId, children }) {
             centralInboxId={centralInboxId}
             threadId={selectedThreadId}
             onClose={handleCloseDetail}
+            onThreadUpdate={handleThreadUpdate}
           />
         </div>
       </div>
@@ -112,7 +128,10 @@ export default function InboxLayout({ centralInboxId, children }) {
             tabIndex={0}
             className="dropdown-content z-[1] mb-2 shadow-xl bg-base-100 rounded-box w-64"
           >
-            <Sidebar />
+            <Sidebar
+              onFilterChange={handleFilterChange}
+              activeFilters={activeFilters}
+            />
           </div>
         </div>
       </div>

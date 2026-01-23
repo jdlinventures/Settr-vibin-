@@ -3,6 +3,7 @@ import { auth } from "@/libs/auth";
 import connectMongo from "@/libs/mongoose";
 import CentralInbox from "@/models/CentralInbox";
 import Email from "@/models/Email";
+import Stage from "@/models/Stage";
 
 /**
  * GET /api/inbox/[centralInboxId]/threads/[threadId]
@@ -46,6 +47,7 @@ export async function GET(request, { params }) {
     })
       .sort({ receivedAt: 1 }) // Oldest first for conversation view
       .populate("tags")
+      .populate("stageId")
       .populate("assignedTo", "name email image");
 
     if (emails.length === 0) {
@@ -59,7 +61,7 @@ export async function GET(request, { params }) {
       threadId,
       emails,
       tags: latestEmail.tags,
-      stageId: latestEmail.stageId,
+      stage: latestEmail.stageId, // Populated stage object
       assignedTo: latestEmail.assignedTo,
       subject: latestEmail.subject,
     });

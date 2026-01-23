@@ -8,6 +8,8 @@ export default function EmailList({
   selectedThreadId,
   onSelectThread,
   filter,
+  activeFilters = {},
+  refreshKey,
 }) {
   const [emails, setEmails] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +31,10 @@ export default function EmailList({
         const params = new URLSearchParams();
         if (cursor) params.set("cursor", cursor);
         if (filter) params.set("filter", filter);
+        if (activeFilters.stageId) params.set("stage", activeFilters.stageId);
+        if (activeFilters.tags?.length > 0) {
+          activeFilters.tags.forEach((tagId) => params.append("tag", tagId));
+        }
 
         const res = await fetch(
           `/api/inbox/${centralInboxId}/emails?${params.toString()}`
@@ -53,12 +59,12 @@ export default function EmailList({
         setLoadingMore(false);
       }
     },
-    [centralInboxId, filter]
+    [centralInboxId, filter, activeFilters.stageId, activeFilters.tags]
   );
 
   useEffect(() => {
     fetchEmails();
-  }, [fetchEmails]);
+  }, [fetchEmails, refreshKey]);
 
   const loadMore = () => {
     if (nextCursor && !loadingMore) {
