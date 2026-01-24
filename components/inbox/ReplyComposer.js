@@ -36,6 +36,7 @@ export default function ReplyComposer({
       }),
     ],
     content: "",
+    immediatelyRender: false,
     editorProps: {
       attributes: {
         class:
