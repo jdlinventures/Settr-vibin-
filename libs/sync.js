@@ -3,13 +3,24 @@ import ConnectedEmail from "@/models/ConnectedEmail";
 import CentralInbox from "@/models/CentralInbox";
 import Email from "@/models/Email";
 import Stage from "@/models/Stage";
-import {
-  fetchEmails as fetchGmailEmails,
-  fetchEmailContent as fetchGmailContent,
-  refreshTokensIfNeeded,
-  encryptTokens,
-} from "./gmail";
-import { fetchEmails as fetchImapEmails } from "./imap";
+
+// Dynamic imports to avoid module bundling issues
+let gmailModule = null;
+let imapModule = null;
+
+async function getGmailModule() {
+  if (!gmailModule) {
+    gmailModule = await import("./gmail");
+  }
+  return gmailModule;
+}
+
+async function getImapModule() {
+  if (!imapModule) {
+    imapModule = await import("./imap");
+  }
+  return imapModule;
+}
 
 /**
  * Sync all connected emails for all users
@@ -97,10 +108,13 @@ export async function syncConnectedEmail(connectedEmailId) {
   let skippedCount = 0;
 
   if (connectedEmail.provider === "gmail") {
+    // Get Gmail module dynamically
+    const gmail = await getGmailModule();
+
     // Refresh tokens if needed
-    const newTokens = await refreshTokensIfNeeded(connectedEmail);
+    const newTokens = await gmail.refreshTokensIfNeeded(connectedEmail);
     if (newTokens) {
-      connectedEmail.oauthTokens = encryptTokens(newTokens);
+      connectedEmail.oauthTokens = gmail.encryptTokens(newTokens);
       await connectedEmail.save();
     }
 
@@ -109,7 +123,7 @@ export async function syncConnectedEmail(connectedEmailId) {
     let allMessages = [];
 
     do {
-      const { messages, nextPageToken } = await fetchGmailEmails(
+      const { messages, nextPageToken } = await gmail.fetchEmails(
         connectedEmail,
         { since, maxResults: 100, pageToken }
       );
@@ -139,7 +153,7 @@ export async function syncConnectedEmail(connectedEmailId) {
         }
 
         // Fetch full email content
-        const emailData = await fetchGmailContent(connectedEmail, message.id);
+        const emailData = await gmail.fetchEmailContent(connectedEmail, message.id);
 
         // Check if messageId already exists (dedup by actual Message-ID header)
         const existsByMessageId = await Email.findOne({
@@ -164,8 +178,9 @@ export async function syncConnectedEmail(connectedEmailId) {
       }
     }
   } else {
-    // IMAP sync
-    const emails = await fetchImapEmails(connectedEmail, {
+    // IMAP sync - get module dynamically
+    const imap = await getImapModule();
+    const emails = await imap.fetchEmails(connectedEmail, {
       since,
       limit: 500,
     });

@@ -3,7 +3,6 @@ import { auth } from "@/libs/auth";
 import connectMongo from "@/libs/mongoose";
 import CentralInbox from "@/models/CentralInbox";
 import ConnectedEmail from "@/models/ConnectedEmail";
-import { syncConnectedEmail } from "@/libs/sync";
 
 /**
  * POST /api/central-inboxes/[id]/assign-email
@@ -67,14 +66,12 @@ export async function POST(request, { params }) {
     connectedEmail.centralInboxId = id;
     await connectedEmail.save();
 
-    // Trigger initial sync for this email (don't await - let it run in background)
-    syncConnectedEmail(connectedEmailId).catch((err) => {
-      console.error("Initial sync failed for:", connectedEmailId, err);
-    });
+    // Note: Email sync will happen via the cron job or can be triggered manually
+    // We skip immediate sync here to avoid module loading issues in dev
 
     return NextResponse.json({
       success: true,
-      message: "Email assigned and sync started",
+      message: "Email assigned successfully. Emails will sync shortly.",
     });
   } catch (error) {
     console.error("Assign email error:", error);

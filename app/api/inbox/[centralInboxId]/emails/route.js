@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 import { auth } from "@/libs/auth";
 import connectMongo from "@/libs/mongoose";
 import CentralInbox from "@/models/CentralInbox";
@@ -51,9 +52,9 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Build query
+    // Build query - convert centralInboxId string to ObjectId for aggregation
     const query = {
-      centralInboxId,
+      centralInboxId: new mongoose.Types.ObjectId(centralInboxId),
       isArchived: false,
     };
 
