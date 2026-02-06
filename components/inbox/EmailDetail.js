@@ -203,7 +203,7 @@ export default function EmailDetail({ centralInboxId, threadId, onClose, onThrea
   const replyData = getReplyData();
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-white overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b border-[#e5e5e5]">
         <div className="flex items-center justify-between mb-3">
@@ -257,7 +257,7 @@ export default function EmailDetail({ centralInboxId, threadId, onClose, onThrea
       </div>
 
       {/* Email Thread */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-3 min-w-0">
         {thread.emails.map((email, index) => {
           const emailId = email._id || email.id;
           const isExpanded = expandedEmails.has(emailId);
@@ -325,7 +325,7 @@ export default function EmailDetail({ centralInboxId, threadId, onClose, onThrea
 
               {/* Email Body - Expanded */}
               {isExpanded && (
-                <div className="px-4 pb-4">
+                <div className="px-4 pb-4 overflow-hidden">
                   {/* To/CC */}
                   <div className="text-[12px] text-neutral-400 mb-4 pl-12">
                     <div>
