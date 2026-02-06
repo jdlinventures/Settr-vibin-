@@ -99,6 +99,11 @@ export default function EmailListItem({ email, isSelected, isKeyboardSelected, o
                 {email.threadUnreadCount} new
               </span>
             )}
+            {email.isLead && (
+              <span className="text-[11px] px-1.5 py-0.5 rounded bg-green-50 text-green-600 border border-green-100 font-medium">
+                Lead
+              </span>
+            )}
             {email.stage && (
               <span
                 className="text-[11px] px-1.5 py-0.5 rounded"

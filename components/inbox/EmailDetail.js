@@ -15,11 +15,14 @@ export default function EmailDetail({ centralInboxId, threadId, onClose, onThrea
   const [updating, setUpdating] = useState(false);
   const [showReplyComposer, setShowReplyComposer] = useState(false);
   const [replyMode, setReplyMode] = useState("reply"); // "reply" | "replyAll" | "forward"
+  const [senderLead, setSenderLead] = useState(null); // null = not checked, false = no lead, object = lead exists
+  const [addingLead, setAddingLead] = useState(false);
 
   useEffect(() => {
     if (threadId) {
       fetchThread();
       setShowReplyComposer(false);
+      setSenderLead(null);
     }
   }, [threadId]);
 
@@ -53,11 +56,68 @@ export default function EmailDetail({ centralInboxId, threadId, onClose, onThrea
           const lastEmail = data.emails[data.emails.length - 1];
           setExpandedEmails(new Set([lastEmail._id || lastEmail.id]));
         }
+
+        // Check if sender is a lead
+        const senderEmail = data.emails.find((e) => !e.isSent)?.from?.email;
+        if (senderEmail) {
+          checkSenderLead(senderEmail);
+        }
       }
     } catch (error) {
       console.error("Failed to fetch thread:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkSenderLead = async (email) => {
+    try {
+      const res = await fetch(
+        `/api/central-inboxes/${centralInboxId}/leads?search=${encodeURIComponent(email)}&limit=1`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const match = data.leads?.find(
+          (l) => l.email.toLowerCase() === email.toLowerCase()
+        );
+        setSenderLead(match || false);
+      }
+    } catch {
+      setSenderLead(false);
+    }
+  };
+
+  const handleAddToCrm = async () => {
+    if (!thread?.emails?.length) return;
+    const inbound = thread.emails.find((e) => !e.isSent);
+    if (!inbound?.from?.email) return;
+
+    setAddingLead(true);
+    try {
+      const nameParts = (inbound.from.name || "").trim().split(/\s+/);
+      const res = await fetch(`/api/central-inboxes/${centralInboxId}/leads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: inbound.from.email,
+          firstName: nameParts[0] || undefined,
+          lastName: nameParts.slice(1).join(" ") || undefined,
+        }),
+      });
+      if (res.ok) {
+        const lead = await res.json();
+        setSenderLead(lead);
+      } else {
+        const err = await res.json();
+        if (err.error?.includes("already exists")) {
+          // Lead exists — re-check
+          checkSenderLead(inbound.from.email);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to add lead:", error);
+    } finally {
+      setAddingLead(false);
     }
   };
 
@@ -212,15 +272,35 @@ export default function EmailDetail({ centralInboxId, threadId, onClose, onThrea
             {thread.subject || "(No Subject)"}
           </h2>
           <div className="flex gap-1">
-            <Link
-              href={`/dashboard/inbox/${centralInboxId}/leads`}
-              className="p-2 rounded-lg hover:bg-[#f5f5f5] transition-colors text-neutral-500 hover:text-[#171717]"
-              title="View Leads"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-              </svg>
-            </Link>
+            {/* Add to CRM / View Lead */}
+            {senderLead ? (
+              <Link
+                href={`/dashboard/inbox/${centralInboxId}/leads`}
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-medium bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
+                title="View Lead in CRM"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
+                In CRM
+              </Link>
+            ) : senderLead === false ? (
+              <button
+                onClick={handleAddToCrm}
+                disabled={addingLead}
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-medium border border-[#e5e5e5] text-neutral-500 hover:bg-[#f5f5f5] hover:text-[#171717] transition-colors"
+                title="Add sender to CRM"
+              >
+                {addingLead ? (
+                  <span className="loading loading-spinner w-3 h-3"></span>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+                  </svg>
+                )}
+                Add to CRM
+              </button>
+            ) : null}
             <button
               onClick={handleArchive}
               className="p-2 rounded-lg hover:bg-[#f5f5f5] transition-colors text-neutral-500 hover:text-[#171717]"

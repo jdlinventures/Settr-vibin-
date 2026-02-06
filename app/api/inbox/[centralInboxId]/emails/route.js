@@ -6,6 +6,7 @@ import CentralInbox from "@/models/CentralInbox";
 import Email from "@/models/Email";
 import Tag from "@/models/Tag";
 import Stage from "@/models/Stage";
+import Lead from "@/models/Lead";
 
 /**
  * GET /api/inbox/[centralInboxId]/emails
@@ -152,6 +153,31 @@ export async function GET(request, { params }) {
       threadUnreadCount: e.unreadCount,
     }));
 
+    // Batch-check which sender emails are leads
+    const senderEmails = [
+      ...new Set(
+        formattedEmails
+          .filter((e) => !e.isSent && e.from?.email)
+          .map((e) => e.from.email.toLowerCase())
+      ),
+    ];
+    const leadSet = new Set();
+    if (senderEmails.length > 0) {
+      const matchingLeads = await Lead.find({
+        centralInboxId: new mongoose.Types.ObjectId(centralInboxId),
+        email: { $in: senderEmails },
+      }).select("email");
+      matchingLeads.forEach((l) => leadSet.add(l.email.toLowerCase()));
+    }
+
+    // Add isLead flag
+    const emailsWithLeadFlag = formattedEmails.map((e) => ({
+      ...e,
+      isLead: !e.isSent && e.from?.email
+        ? leadSet.has(e.from.email.toLowerCase())
+        : false,
+    }));
+
     // Get next cursor
     const nextCursor =
       hasMore && resultEmails.length > 0
@@ -159,7 +185,7 @@ export async function GET(request, { params }) {
         : null;
 
     return NextResponse.json({
-      emails: formattedEmails,
+      emails: emailsWithLeadFlag,
       nextCursor,
       hasMore,
     });

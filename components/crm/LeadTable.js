@@ -29,12 +29,14 @@ export default function LeadTable({
   page,
   total,
   onPageChange,
+  showInbox,
 }) {
   const totalPages = Math.ceil(total / 50);
 
   const columns = [
     { key: "email", label: "Contact" },
     { key: "company", label: "Company" },
+    ...(showInbox ? [{ key: "centralInboxId", label: "Inbox" }] : []),
     { key: "stageId", label: "Stage" },
     { key: "lastContactedAt", label: "Last Contact" },
     { key: "followUpDate", label: "Follow-up" },
@@ -102,6 +104,15 @@ export default function LeadTable({
                       {lead.company || "—"}
                     </span>
                   </td>
+
+                  {/* Inbox (global view only) */}
+                  {showInbox && (
+                    <td className="px-4 py-3">
+                      <span className="text-xs text-neutral-500">
+                        {lead.centralInboxId?.name || "—"}
+                      </span>
+                    </td>
+                  )}
 
                   {/* Stage */}
                   <td className="px-4 py-3">
