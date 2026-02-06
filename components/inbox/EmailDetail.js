@@ -317,8 +317,8 @@ export default function EmailDetail({ centralInboxId, threadId, onClose, onThrea
 
                 {/* Preview when collapsed */}
                 {!isExpanded && (
-                  <p className="text-sm text-neutral-400 mt-2 truncate pl-12">
-                    {email.bodyText?.slice(0, 150) || "(No content)"}
+                  <p className="text-sm text-neutral-400 mt-2 pl-12 line-clamp-2 break-words">
+                    {email.bodyText?.slice(0, 200) || "(No content)"}
                   </p>
                 )}
               </div>
@@ -337,14 +337,14 @@ export default function EmailDetail({ centralInboxId, threadId, onClose, onThrea
                   </div>
 
                   {/* Body */}
-                  <div className="pl-12">
+                  <div className="pl-12 overflow-hidden">
                     {email.bodyHtml ? (
                       <div
-                        className="prose prose-sm max-w-none prose-neutral"
+                        className="email-body-content prose prose-sm max-w-none prose-neutral"
                         dangerouslySetInnerHTML={{ __html: email.bodyHtml }}
                       />
                     ) : (
-                      <div className="whitespace-pre-wrap text-sm text-neutral-700">
+                      <div className="whitespace-pre-wrap text-sm text-neutral-700 break-words">
                         {email.bodyText || "(No content)"}
                       </div>
                     )}
