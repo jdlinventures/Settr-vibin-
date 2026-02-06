@@ -13,7 +13,6 @@ export default function NotificationBell() {
 
   useEffect(() => {
     fetchNotifications();
-    // Poll for new notifications every 30 seconds
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -43,13 +42,9 @@ export default function NotificationBell() {
 
   const markAsRead = async (notificationId) => {
     try {
-      await fetch(`/api/notifications/${notificationId}/read`, {
-        method: "POST",
-      });
+      await fetch(`/api/notifications/${notificationId}/read`, { method: "POST" });
       setNotifications((prev) =>
-        prev.map((n) =>
-          (n._id || n.id) === notificationId ? { ...n, isRead: true } : n
-        )
+        prev.map((n) => ((n._id || n.id) === notificationId ? { ...n, isRead: true } : n))
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (err) {
@@ -74,73 +69,31 @@ export default function NotificationBell() {
     setIsOpen(false);
   };
 
-  const getNotificationIcon = (type) => {
-    switch (type) {
-      case "invitation":
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-primary">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-          </svg>
-        );
-      case "assignment":
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-info">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-          </svg>
-        );
-      case "new_email":
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-success">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-          </svg>
-        );
-      default:
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-          </svg>
-        );
-    }
-  };
-
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="btn btn-ghost btn-circle"
+        className="p-2 rounded-lg hover:bg-[#f5f5f5] transition-colors relative"
       >
-        <div className="indicator">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-6 h-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
-            />
-          </svg>
-          {unreadCount > 0 && (
-            <span className="badge badge-xs badge-primary indicator-item">
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
-          )}
-        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-neutral-500">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+        </svg>
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#171717] text-white text-[10px] font-medium rounded-full flex items-center justify-center">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-base-100 border border-base-300 rounded-lg shadow-xl z-50">
+        <div className="absolute right-0 mt-2 w-80 glass-panel border border-[#e5e5e5] rounded-xl shadow-lg z-50 animate-[fadeIn_150ms_ease-out]">
           {/* Header */}
-          <div className="p-3 border-b border-base-300 flex items-center justify-between">
-            <span className="font-semibold">Notifications</span>
+          <div className="p-3 border-b border-[#e5e5e5] flex items-center justify-between">
+            <span className="font-semibold text-sm text-[#171717]">Notifications</span>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-xs text-primary hover:underline"
+                className="text-xs text-neutral-500 hover:text-[#171717] transition-colors"
               >
                 Mark all as read
               </button>
@@ -150,7 +103,7 @@ export default function NotificationBell() {
           {/* Notification List */}
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="p-4 text-center text-base-content/50">
+              <div className="p-6 text-center text-neutral-400 text-sm">
                 No notifications
               </div>
             ) : (
@@ -158,33 +111,28 @@ export default function NotificationBell() {
                 const notificationId = notification._id || notification.id;
                 const content = (
                   <div
-                    className={`p-3 border-b border-base-200 hover:bg-base-200 transition-colors cursor-pointer ${
-                      !notification.isRead ? "bg-primary/5" : ""
+                    className={`p-3 border-b border-[#f0f0f0] hover:bg-[#f5f5f5] transition-colors cursor-pointer ${
+                      !notification.isRead ? "bg-[#fafafa]" : ""
                     }`}
                     onClick={() => handleNotificationClick(notification)}
                   >
                     <div className="flex gap-3">
-                      <div className="flex-shrink-0 mt-1">
-                        {getNotificationIcon(notification.type)}
-                      </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm">
+                        <div className="font-medium text-sm text-[#171717]">
                           {notification.title}
                         </div>
                         {notification.body && (
-                          <div className="text-sm text-base-content/70 truncate">
+                          <div className="text-sm text-neutral-500 truncate">
                             {notification.body}
                           </div>
                         )}
-                        <div className="text-xs text-base-content/50 mt-1">
-                          {formatDistanceToNow(new Date(notification.createdAt), {
-                            addSuffix: true,
-                          })}
+                        <div className="text-[11px] text-neutral-400 mt-1">
+                          {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                         </div>
                       </div>
                       {!notification.isRead && (
-                        <div className="flex-shrink-0">
-                          <div className="w-2 h-2 bg-primary rounded-full"></div>
+                        <div className="flex-shrink-0 pt-1">
+                          <div className="w-2 h-2 bg-[#171717] rounded-full"></div>
                         </div>
                       )}
                     </div>

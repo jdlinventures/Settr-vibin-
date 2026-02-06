@@ -3,7 +3,7 @@
 import { formatDistanceToNow } from "date-fns";
 import TagBadge from "./TagBadge";
 
-export default function EmailListItem({ email, isSelected, isKeyboardSelected, onClick }) {
+export default function EmailListItem({ email, isSelected, isKeyboardSelected, onClick, showCheckbox, isChecked, onCheckChange }) {
   const isUnread = !email.isRead || email.threadUnreadCount > 0;
 
   // Get preview text from body
@@ -36,71 +36,91 @@ export default function EmailListItem({ email, isSelected, isKeyboardSelected, o
     <div
       onClick={onClick}
       className={`
-        px-4 py-3 border-b border-base-200 cursor-pointer transition-colors
-        hover:bg-base-200
-        ${isSelected ? "bg-base-200 border-l-2 border-l-primary" : ""}
-        ${isKeyboardSelected && !isSelected ? "ring-2 ring-inset ring-primary/30" : ""}
-        ${isUnread ? "bg-base-100" : "bg-base-100/50"}
+        group px-4 py-3 border-b border-[#e5e5e5] cursor-pointer transition-all duration-150
+        hover:bg-[#f5f5f5]
+        ${isSelected ? "bg-[#f5f5f5]" : ""}
+        ${isKeyboardSelected && !isSelected ? "ring-1 ring-inset ring-neutral-300" : ""}
       `}
     >
-      {/* Top row: Sender and time */}
-      <div className="flex items-center justify-between mb-1">
-        <span
-          className={`text-sm truncate flex-1 ${
-            isUnread ? "font-semibold" : "font-normal"
-          }`}
-        >
-          {getSenderDisplay()}
-        </span>
-        <span className="text-xs text-base-content/50 ml-2 whitespace-nowrap">
-          {getTimeDisplay()}
-        </span>
-      </div>
-
-      {/* Subject */}
-      <div
-        className={`text-sm truncate mb-1 ${
-          isUnread ? "font-medium" : "font-normal text-base-content/80"
-        }`}
-      >
-        {email.subject || "(No Subject)"}
-      </div>
-
-      {/* Preview */}
-      <div className="text-xs text-base-content/60 truncate">{getPreview()}</div>
-
-      {/* Bottom row: Thread count, stage, and tags */}
-      <div className="flex items-center gap-2 mt-2 flex-wrap">
-        {email.threadEmailCount > 1 && (
-          <span className="badge badge-sm badge-ghost">
-            {email.threadEmailCount} messages
-          </span>
+      <div className="flex items-start gap-3">
+        {/* Checkbox for bulk select */}
+        {showCheckbox && (
+          <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
+            <input
+              type="checkbox"
+              checked={isChecked}
+              onChange={(e) => onCheckChange?.(e.target.checked)}
+              className="checkbox checkbox-sm rounded-full border-neutral-300"
+            />
+          </div>
         )}
-        {email.threadUnreadCount > 0 && (
-          <span className="badge badge-sm badge-primary">
-            {email.threadUnreadCount} new
-          </span>
-        )}
-        {email.stage && (
-          <span
-            className="badge badge-sm"
-            style={{
-              backgroundColor: `${email.stage.color}20`,
-              color: email.stage.color,
-              border: `1px solid ${email.stage.color}40`,
-            }}
+
+        <div className="flex-1 min-w-0">
+          {/* Top row: Sender, unread dot, and time */}
+          <div className="flex items-center justify-between mb-0.5">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              {isUnread && (
+                <span className="w-1.5 h-1.5 rounded-full bg-[#171717] flex-shrink-0" />
+              )}
+              <span
+                className={`text-[13px] truncate ${
+                  isUnread ? "font-semibold text-[#171717]" : "font-normal text-neutral-600"
+                }`}
+              >
+                {getSenderDisplay()}
+              </span>
+            </div>
+            <span className="text-[11px] text-neutral-400 ml-2 whitespace-nowrap">
+              {getTimeDisplay()}
+            </span>
+          </div>
+
+          {/* Subject */}
+          <div
+            className={`text-[13px] truncate mb-0.5 ${
+              isUnread ? "font-medium text-[#171717]" : "font-normal text-neutral-500"
+            }`}
           >
-            {email.stage.name}
-          </span>
-        )}
-        {email.tags?.slice(0, 2).map((tag) => (
-          <TagBadge key={tag._id || tag.id} tag={tag} size="xs" />
-        ))}
-        {email.tags?.length > 2 && (
-          <span className="text-xs text-base-content/50">
-            +{email.tags.length - 2}
-          </span>
-        )}
+            {email.subject || "(No Subject)"}
+          </div>
+
+          {/* Preview */}
+          <div className="text-[12px] text-neutral-400 truncate">{getPreview()}</div>
+
+          {/* Bottom row: Thread count, stage, and tags */}
+          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+            {email.threadEmailCount > 1 && (
+              <span className="text-[11px] text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded">
+                {email.threadEmailCount}
+              </span>
+            )}
+            {email.threadUnreadCount > 0 && (
+              <span className="text-[11px] font-medium text-[#171717] bg-neutral-200 px-1.5 py-0.5 rounded">
+                {email.threadUnreadCount} new
+              </span>
+            )}
+            {email.stage && (
+              <span
+                className="text-[11px] px-1.5 py-0.5 rounded"
+                style={{
+                  backgroundColor: `${email.stage.color}15`,
+                  color: email.stage.color,
+                  border: `1px solid ${email.stage.color}30`,
+                }}
+              >
+                {email.stage.name}
+              </span>
+            )}
+            {email.tags?.slice(0, 2).map((tag) => (
+              <TagBadge key={tag._id || tag.id} tag={tag} size="xs" />
+            ))}
+            {email.tags?.length > 2 && (
+              <span className="text-[11px] text-neutral-400">
+                +{email.tags.length - 2}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

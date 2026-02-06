@@ -43,6 +43,7 @@ export async function POST(request) {
       centralInboxId,
       to,
       cc,
+      bcc,
       subject,
       bodyHtml,
       replyToEmailId,
@@ -97,6 +98,7 @@ export async function POST(request) {
         centralInboxId,
         to,
         cc: cc || [],
+        bcc: bcc || [],
         subject,
         bodyHtml,
         replyToEmail,
@@ -147,6 +149,7 @@ export async function POST(request) {
     const emailToSend = {
       to: emailData.to,
       cc: emailData.cc,
+      bcc: emailData.bcc || [],
       subject: emailData.subject,
       bodyHtml: emailData.bodyHtml,
       bodyText: htmlToText(emailData.bodyHtml),

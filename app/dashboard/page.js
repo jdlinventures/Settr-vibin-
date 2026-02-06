@@ -48,35 +48,41 @@ export default async function Dashboard() {
 
   // Show onboarding/setup screen
   return (
-    <main className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-      <div className="card bg-base-100 shadow-xl max-w-lg w-full">
-        <div className="card-body text-center">
-          <h1 className="text-2xl font-bold mb-2">Welcome to Settr</h1>
-          <p className="text-base-content/70 mb-6">
-            Let's get you set up with your first unified inbox.
+    <main className="min-h-screen bg-[#fafafa] flex items-center justify-center p-4">
+      <div className="bg-white border border-[#e5e5e5] rounded-xl shadow-sm max-w-lg w-full">
+        <div className="p-8 text-center">
+          <h1 className="text-2xl font-bold text-[#171717] mb-2">Welcome to Settr</h1>
+          <p className="text-neutral-500 text-sm mb-8">
+            Let&apos;s get you set up with your first unified inbox.
           </p>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* Step 1: Connect Email */}
             <div
-              className={`flex items-center gap-4 p-4 rounded-lg border ${
+              className={`flex items-center gap-4 p-4 rounded-xl border transition-colors ${
                 connectedEmails.length > 0
-                  ? "border-success bg-success/10"
-                  : "border-base-300"
+                  ? "border-green-200 bg-green-50"
+                  : "border-[#e5e5e5] bg-[#fafafa]"
               }`}
             >
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                   connectedEmails.length > 0
-                    ? "bg-success text-success-content"
-                    : "bg-base-300"
+                    ? "bg-green-500 text-white"
+                    : "bg-[#e5e5e5] text-neutral-500"
                 }`}
               >
-                {connectedEmails.length > 0 ? "✓" : "1"}
+                {connectedEmails.length > 0 ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                ) : (
+                  "1"
+                )}
               </div>
               <div className="flex-1 text-left">
-                <div className="font-medium">Connect an email account</div>
-                <div className="text-sm text-base-content/60">
+                <div className="font-medium text-sm text-[#171717]">Connect an email account</div>
+                <div className="text-xs text-neutral-500 mt-0.5">
                   {connectedEmails.length > 0
                     ? `${connectedEmails.length} email(s) connected`
                     : "Link your Gmail or other email provider"}
@@ -84,20 +90,20 @@ export default async function Dashboard() {
               </div>
               <Link
                 href="/dashboard/settings/emails"
-                className="btn btn-sm btn-primary"
+                className="px-3 py-1.5 bg-[#171717] text-white rounded-lg text-xs font-medium hover:bg-[#262626] transition-colors"
               >
                 {connectedEmails.length > 0 ? "Manage" : "Connect"}
               </Link>
             </div>
 
             {/* Step 2: Create Inbox */}
-            <div className="flex items-center gap-4 p-4 rounded-lg border border-base-300">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-base-300">
+            <div className="flex items-center gap-4 p-4 rounded-xl border border-[#e5e5e5] bg-[#fafafa]">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-[#e5e5e5] text-neutral-500">
                 2
               </div>
               <div className="flex-1 text-left">
-                <div className="font-medium">Create a central inbox</div>
-                <div className="text-sm text-base-content/60">
+                <div className="font-medium text-sm text-[#171717]">Create a central inbox</div>
+                <div className="text-xs text-neutral-500 mt-0.5">
                   Group emails by client, campaign, or team
                 </div>
               </div>
@@ -106,7 +112,7 @@ export default async function Dashboard() {
           </div>
 
           {connectedEmails.length === 0 && (
-            <p className="text-sm text-base-content/50 mt-6">
+            <p className="text-xs text-neutral-400 mt-6">
               Connect at least one email account to create your first inbox.
             </p>
           )}
@@ -124,7 +130,7 @@ function CreateInboxButton({ disabled }) {
       <button
         type="submit"
         disabled={disabled}
-        className="btn btn-sm btn-primary"
+        className="px-3 py-1.5 bg-[#171717] text-white rounded-lg text-xs font-medium hover:bg-[#262626] disabled:opacity-30 transition-colors"
         formAction={async () => {
           "use server";
           const { auth } = await import("@/libs/auth");

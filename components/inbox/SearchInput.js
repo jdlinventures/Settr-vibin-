@@ -36,7 +36,7 @@ export default function SearchInput({ onSearch, inputRef }) {
           viewBox="0 0 24 24"
           strokeWidth={1.5}
           stroke="currentColor"
-          className="w-4 h-4 text-base-content/50"
+          className="w-4 h-4 text-neutral-400"
         >
           <path
             strokeLinecap="round"
@@ -51,7 +51,7 @@ export default function SearchInput({ onSearch, inputRef }) {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search emails..."
-        className="input input-sm input-bordered w-full pl-9 pr-8"
+        className="w-full bg-[#f5f5f5] border-0 rounded-lg pl-9 pr-8 py-2 text-sm text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 transition-all"
       />
       {query && (
         <button
@@ -64,7 +64,7 @@ export default function SearchInput({ onSearch, inputRef }) {
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className="w-4 h-4 text-base-content/50 hover:text-base-content"
+            className="w-4 h-4 text-neutral-400 hover:text-neutral-600 transition-colors"
           >
             <path
               strokeLinecap="round"

@@ -2,18 +2,18 @@
 
 export default function TagBadge({ tag, onRemove, size = "sm" }) {
   const sizeClasses = {
-    xs: "text-xs px-1.5 py-0.5",
-    sm: "text-xs px-2 py-1",
-    md: "text-sm px-2.5 py-1",
+    xs: "text-[10px] px-1.5 py-0.5",
+    sm: "text-[11px] px-2 py-0.5",
+    md: "text-xs px-2.5 py-1",
   };
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full font-medium ${sizeClasses[size]}`}
+      className={`inline-flex items-center gap-1 rounded-full font-medium border ${sizeClasses[size]}`}
       style={{
-        backgroundColor: `${tag.color}20`,
+        backgroundColor: `${tag.color}10`,
         color: tag.color,
-        border: `1px solid ${tag.color}40`,
+        borderColor: `${tag.color}25`,
       }}
     >
       {tag.name}

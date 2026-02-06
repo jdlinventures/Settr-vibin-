@@ -55,7 +55,7 @@ export default function StageDropdown({
       {/* Current Stage Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 border border-base-300 rounded-lg hover:border-base-content/30 transition-colors text-sm"
+        className="flex items-center gap-2 px-3 py-1.5 border border-[#e5e5e5] rounded-lg hover:border-neutral-400 transition-colors text-sm"
       >
         {selectedStage ? (
           <>
@@ -66,7 +66,7 @@ export default function StageDropdown({
             <span>{selectedStage.name}</span>
           </>
         ) : (
-          <span className="text-base-content/50">No stage</span>
+          <span className="text-neutral-400">No stage</span>
         )}
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -74,7 +74,7 @@ export default function StageDropdown({
           viewBox="0 0 24 24"
           strokeWidth={2}
           stroke="currentColor"
-          className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
         >
           <path
             strokeLinecap="round"
@@ -86,14 +86,14 @@ export default function StageDropdown({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-48 bg-base-100 border border-base-300 rounded-lg shadow-lg">
+        <div className="absolute z-50 mt-1 w-48 bg-white border border-[#e5e5e5] rounded-lg shadow-lg animate-[fadeIn_150ms_ease-out]">
           <div className="max-h-64 overflow-y-auto p-1">
             {loading ? (
               <div className="flex justify-center p-2">
                 <span className="loading loading-spinner loading-sm"></span>
               </div>
             ) : stages.length === 0 ? (
-              <p className="text-sm text-base-content/50 p-2 text-center">
+              <p className="text-sm text-neutral-400 p-2 text-center">
                 No stages
               </p>
             ) : (
@@ -101,10 +101,10 @@ export default function StageDropdown({
                 {/* Clear option */}
                 <button
                   onClick={() => selectStage(null)}
-                  className="w-full flex items-center gap-2 p-2 rounded hover:bg-base-200 transition-colors"
+                  className="w-full flex items-center gap-2 p-2 rounded-md hover:bg-[#f5f5f5] transition-colors"
                 >
-                  <span className="w-2.5 h-2.5 rounded-full border border-base-300" />
-                  <span className="text-sm text-base-content/50">
+                  <span className="w-2.5 h-2.5 rounded-full border border-neutral-300" />
+                  <span className="text-sm text-neutral-400">
                     No stage
                   </span>
                 </button>
@@ -117,8 +117,8 @@ export default function StageDropdown({
                     <button
                       key={stageId}
                       onClick={() => selectStage(stage)}
-                      className={`w-full flex items-center gap-2 p-2 rounded hover:bg-base-200 transition-colors ${
-                        isSelected ? "bg-base-200" : ""
+                      className={`w-full flex items-center gap-2 p-2 rounded-md hover:bg-[#f5f5f5] transition-colors ${
+                        isSelected ? "bg-[#f5f5f5]" : ""
                       }`}
                     >
                       <span
@@ -135,7 +135,7 @@ export default function StageDropdown({
                           viewBox="0 0 24 24"
                           strokeWidth={2}
                           stroke="currentColor"
-                          className="w-4 h-4 text-primary"
+                          className="w-4 h-4 text-[#171717]"
                         >
                           <path
                             strokeLinecap="round"

@@ -10,7 +10,7 @@ import { syncAllEmails } from "@/libs/sync";
  * {
  *   "crons": [{
  *     "path": "/api/cron/sync",
- *     "schedule": "*/2 * * * *"
+ *     "schedule": "star/2 * * * *" (replace star with *)
  *   }]
  * }
  */

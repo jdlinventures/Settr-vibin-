@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  serverExternalPackages: ["gcp-metadata"],
   images: {
     remotePatterns: [
       // NextJS <Image> component needs to whitelist domains for src={}
@@ -27,7 +28,7 @@ const nextConfig = {
     if (isServer) {
       config.plugins.push(
         new webpack.IgnorePlugin({
-          resourceRegExp: /^(kerberos|@mongodb-js\/zstd|@aws-sdk\/credential-providers|gcp-metadata|snappy|socks|aws4|mongodb-client-encryption)$/,
+          resourceRegExp: /^(kerberos|@mongodb-js\/zstd|@aws-sdk\/credential-providers|snappy|socks|aws4|mongodb-client-encryption)$/,
         })
       );
     }

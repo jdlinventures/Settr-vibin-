@@ -42,6 +42,7 @@ const draftSchema = mongoose.Schema(
     },
     to: [emailParticipantSchema],
     cc: [emailParticipantSchema],
+    bcc: [emailParticipantSchema],
     subject: {
       type: String,
       trim: true,

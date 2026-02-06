@@ -93,7 +93,7 @@ export default function TagSelector({
       {/* Selected Tags Display */}
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className="flex flex-wrap items-center gap-1 min-h-[32px] p-1 border border-base-300 rounded-lg cursor-pointer hover:border-base-content/30 transition-colors"
+        className="flex flex-wrap items-center gap-1 min-h-[32px] p-1 border border-[#e5e5e5] rounded-lg cursor-pointer hover:border-neutral-400 transition-colors"
       >
         {selectedTags.length > 0 ? (
           selectedTags.map((tag) => (
@@ -105,27 +105,27 @@ export default function TagSelector({
             />
           ))
         ) : (
-          <span className="text-sm text-base-content/50 px-2">Add tags...</span>
+          <span className="text-sm text-neutral-400 px-2">Add tags...</span>
         )}
       </div>
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-56 bg-base-100 border border-base-300 rounded-lg shadow-lg">
+        <div className="absolute z-50 mt-1 w-56 bg-white border border-[#e5e5e5] rounded-lg shadow-lg animate-[fadeIn_150ms_ease-out]">
           {/* Create New Tag */}
-          <form onSubmit={createTag} className="p-2 border-b border-base-300">
+          <form onSubmit={createTag} className="p-2 border-b border-[#e5e5e5]">
             <div className="flex gap-1">
               <input
                 type="text"
                 value={newTagName}
                 onChange={(e) => setNewTagName(e.target.value)}
                 placeholder="New tag..."
-                className="input input-sm input-bordered flex-1"
+                className="flex-1 px-2.5 py-1.5 bg-[#f5f5f5] border-0 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-neutral-300"
               />
               <button
                 type="submit"
                 disabled={!newTagName.trim() || creating}
-                className="btn btn-sm btn-primary"
+                className="px-2.5 py-1.5 bg-[#171717] text-white rounded-md text-sm font-medium hover:bg-[#262626] disabled:opacity-30 transition-colors"
               >
                 {creating ? (
                   <span className="loading loading-spinner loading-xs"></span>
@@ -143,7 +143,7 @@ export default function TagSelector({
                 <span className="loading loading-spinner loading-sm"></span>
               </div>
             ) : tags.length === 0 ? (
-              <p className="text-sm text-base-content/50 p-2 text-center">
+              <p className="text-sm text-neutral-400 p-2 text-center">
                 No tags yet
               </p>
             ) : (
@@ -157,8 +157,8 @@ export default function TagSelector({
                   <button
                     key={tagId}
                     onClick={() => toggleTag(tag)}
-                    className={`w-full flex items-center gap-2 p-2 rounded hover:bg-base-200 transition-colors ${
-                      isSelected ? "bg-base-200" : ""
+                    className={`w-full flex items-center gap-2 p-2 rounded-md hover:bg-[#f5f5f5] transition-colors ${
+                      isSelected ? "bg-[#f5f5f5]" : ""
                     }`}
                   >
                     <span
@@ -173,7 +173,7 @@ export default function TagSelector({
                         viewBox="0 0 24 24"
                         strokeWidth={2}
                         stroke="currentColor"
-                        className="w-4 h-4 text-primary"
+                        className="w-4 h-4 text-[#171717]"
                       >
                         <path
                           strokeLinecap="round"
