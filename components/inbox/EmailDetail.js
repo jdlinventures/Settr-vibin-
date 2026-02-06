@@ -345,7 +345,7 @@ export default function EmailDetail({ centralInboxId, threadId, onClose, onThrea
                           dangerouslySetInnerHTML={{ __html: email.bodyHtml }}
                         />
                       ) : (
-                        <div className="whitespace-pre-wrap text-sm text-neutral-700 break-words">
+                        <div className="whitespace-pre-wrap text-sm text-neutral-700 break-all">
                           {email.bodyText || "(No content)"}
                         </div>
                       )}
