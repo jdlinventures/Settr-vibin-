@@ -3,6 +3,7 @@ import ConnectedEmail from "@/models/ConnectedEmail";
 import CentralInbox from "@/models/CentralInbox";
 import Email from "@/models/Email";
 import Stage from "@/models/Stage";
+import Lead from "@/models/Lead";
 
 // Dynamic imports to avoid module bundling issues
 let gmailModule = null;
@@ -272,7 +273,66 @@ async function processAndSaveEmail(
 
   await email.save();
 
+  // Auto-create or update lead from inbound emails
+  if (!isSent && emailData.from?.email) {
+    try {
+      await autoUpsertLead(
+        connectedEmail.centralInboxId,
+        emailData.from,
+        emailData.threadId,
+        emailData.receivedAt,
+        defaultStage
+      );
+    } catch (leadErr) {
+      // Don't fail the email sync if lead creation fails
+      console.error("Lead auto-upsert failed:", leadErr.message);
+    }
+  }
+
   return email;
+}
+
+/**
+ * Auto-create or update a lead from an inbound email sender
+ */
+async function autoUpsertLead(centralInboxId, from, threadId, receivedAt, defaultStage) {
+  const senderEmail = from.email?.toLowerCase().trim();
+  if (!senderEmail) return;
+
+  // Try to parse first/last name from sender name
+  let firstName = "";
+  let lastName = "";
+  if (from.name) {
+    const parts = from.name.trim().split(/\s+/);
+    firstName = parts[0] || "";
+    lastName = parts.slice(1).join(" ") || "";
+  }
+
+  const existing = await Lead.findOne({
+    centralInboxId,
+    email: senderEmail,
+  });
+
+  if (existing) {
+    // Update existing lead: add threadId, update lastRepliedAt
+    const update = { lastRepliedAt: receivedAt };
+    if (threadId && !existing.emailThreadIds.includes(threadId)) {
+      update.$addToSet = { emailThreadIds: threadId };
+    }
+    await Lead.updateOne({ _id: existing._id }, update);
+  } else {
+    // Create new lead
+    await Lead.create({
+      centralInboxId,
+      email: senderEmail,
+      firstName: firstName || undefined,
+      lastName: lastName || undefined,
+      source: "auto_detected",
+      stageId: defaultStage?._id || undefined,
+      lastRepliedAt: receivedAt,
+      emailThreadIds: threadId ? [threadId] : [],
+    });
+  }
 }
 
 /**
