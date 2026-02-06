@@ -202,26 +202,23 @@ progress::-webkit-progress-value {
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word;
-  overflow-x: auto;
+  min-width: 0;
 }
 
 .email-body-content img {
-  max-width: 100%;
-  height: auto;
+  max-width: 100% !important;
+  height: auto !important;
 }
 
 .email-body-content table {
-  max-width: 100%;
-  overflow-x: auto;
-  display: block;
+  font-size: 13px;
 }
 
 .email-body-content pre,
 .email-body-content code {
-  max-width: 100%;
-  overflow-x: auto;
   white-space: pre-wrap;
   word-wrap: break-word;
+  word-break: break-all;
 }
 
 .email-body-content a {
@@ -235,8 +232,16 @@ progress::-webkit-progress-value {
   color: #737373;
 }
 
-.email-body-content * {
+/* Wrapper that allows wide HTML emails to scroll horizontally */
+.email-body-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
   max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.email-body-wrapper > * {
+  min-width: 0;
 }
 
 /* Template variable highlighting */

@@ -265,7 +265,7 @@ export default function EmailDetail({ centralInboxId, threadId, onClose, onThrea
           return (
             <div
               key={emailId}
-              className="bg-white border border-[#e5e5e5] rounded-xl shadow-sm overflow-hidden"
+              className="bg-white border border-[#e5e5e5] rounded-xl shadow-sm overflow-hidden min-w-0"
             >
               {/* Email Header - Always Visible */}
               <div
@@ -337,17 +337,19 @@ export default function EmailDetail({ centralInboxId, threadId, onClose, onThrea
                   </div>
 
                   {/* Body */}
-                  <div className="pl-12 overflow-hidden">
-                    {email.bodyHtml ? (
-                      <div
-                        className="email-body-content prose prose-sm max-w-none prose-neutral"
-                        dangerouslySetInnerHTML={{ __html: email.bodyHtml }}
-                      />
-                    ) : (
-                      <div className="whitespace-pre-wrap text-sm text-neutral-700 break-words">
-                        {email.bodyText || "(No content)"}
-                      </div>
-                    )}
+                  <div className="pl-12 min-w-0">
+                    <div className="email-body-wrapper">
+                      {email.bodyHtml ? (
+                        <div
+                          className="email-body-content prose prose-sm max-w-none prose-neutral"
+                          dangerouslySetInnerHTML={{ __html: email.bodyHtml }}
+                        />
+                      ) : (
+                        <div className="whitespace-pre-wrap text-sm text-neutral-700 break-words">
+                          {email.bodyText || "(No content)"}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Attachments */}
